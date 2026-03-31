@@ -18,38 +18,43 @@ import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.repository.RoomRepository;
 
+import jakarta.transaction.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@Transactional
 public class InvoiceIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
 
     @Autowired
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
 
     @Autowired
-    RoomRepository roomRepository;
+    private RoomRepository roomRepository;
 
     @Test
     void testGenerateInvoice() throws Exception {
 
-        // 1️⃣ Customer create
+        // 🟢 1. Create Customer
         Customer customer = new Customer();
         customer.setName("Test User");
-        customer.setEmail("swork2804@gmail.com");   // 🔥 IMPORTANT
-        customer.setPhone("9876543210");       // जर required असेल तर
+        customer.setEmail("testuser@gmail.com");
+        customer.setPhone("9876543210");
+
         Customer savedCustomer = customerRepository.save(customer);
 
-        // 2️⃣ Room create
+        // 🟢 2. Create Room
         Room room = new Room();
         room.setPrice(5000);
+
         Room savedRoom = roomRepository.save(room);
 
-        // 3️⃣ Booking create (ALL required fields set कर)
+        // 🟢 3. Create Booking (ALL required fields)
         Booking booking = new Booking();
         booking.setCustomer(savedCustomer);
         booking.setRoom(savedRoom);
@@ -60,7 +65,7 @@ public class InvoiceIntegrationTest {
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        // 4️⃣ Call API
+        // 🟢 4. Call API using REAL ID
         mockMvc.perform(post("/api/invoice/generate/" + savedBooking.getBookingId()))
                 .andExpect(status().isOk());
     }
